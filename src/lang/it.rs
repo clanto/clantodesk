@@ -454,7 +454,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("Restore", "Ripristina"),
         ("Minimize", "Minimizza"),
         ("Maximize", "Massimizza"),
-        ("Your Device", "Questo dispositivo"),
+        ("Your Device", "Questa è una versione modificata di Rustdesk per utilizzare i server europei della Clanto Services per effettuare l'accesso. Puoi connetterti solo ad altre istanze Clanto Desktop.\nQuesto dispositivo"),
         ("empty_recent_tip", "Non c'è nessuna sessione recente!\nPianificane una."),
         ("empty_favorite_tip", "Ancora nessuna connessione?\nTrova qualcuno con cui connetterti e aggiungilo ai preferiti!"),
         ("empty_lan_tip", "Sembra proprio che non sia stata rilevata nessuna connessione."),
