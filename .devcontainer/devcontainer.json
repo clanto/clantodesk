@@ -1,0 +1,23 @@
+{
+  "name": "RustDesk Dev Environment",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteEnv": {
+    "VCPKG_ROOT": "/usr/local/vcpkg",
+    "PATH": "${containerEnv:PATH}:/usr/local/flutter/bin:/home/vscode/.cargo/bin"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "Dart-Code.flutter",
+        "ms-vscode.cpptools",
+        "ms-python.python"
+      ]
+    }
+  },
+  // We run the heavy compilation here so the container starts successfully first.
+  // This will run automatically in the terminal when the container creates.
+  "postCreateCommand": "vcpkg install libvpx libyuv opus aom"
+}
