@@ -27,8 +27,8 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-
+          submodules: false
+          
       - name: Install prerequisites
         run: |
           sudo apt-get install ca-certificates -y
