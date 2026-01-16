@@ -314,8 +314,6 @@ jobs:
 
       - name: Checkout source code
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install LLVM and Clang
         uses: rustdesk-org/install-llvm-action-32bit@master
