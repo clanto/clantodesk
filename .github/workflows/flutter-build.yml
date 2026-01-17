@@ -252,7 +252,7 @@ jobs:
           python3 ./generate.py -f ../../clantodesk/ -o . -e ../../clantodesk/clantodesk.exe
           popd
           mkdir -p ./SignOutput
-          mv ./target/release/clantodesk-portable-packer.exe ./SignOutput/clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
+          mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
@@ -417,7 +417,7 @@ jobs:
           python3 ./generate.py -f ../../Release/ -o . -e ../../Release/clantodesk.exe
           popd
           mkdir -p ./SignOutput
-          mv ./target/release/clantodesk-portable-packer.exe ./SignOutput/clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.exe
+          mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.exe
 
       - name: Sign rustdesk self-extracted file
         if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != ''
@@ -1551,8 +1551,8 @@ jobs:
             export CARGO_INCREMENTAL=0
             export DEB_ARCH=${{ matrix.job.deb_arch }}
             python3 ./build.py --flutter --skip-cargo
-            for name in clantodesk*??.deb; do
-              mv "$name" "${name%%.deb}-${{ matrix.job.arch }}.deb"
+            for name in rustdesk*??.deb; do
+              mv "$name" "clantodesk-${{ matrix.job.arch }}.deb"
             done
 
             # rpm package
@@ -1834,9 +1834,9 @@ jobs:
       - name: Rename rustdesk
         shell: bash
         run: |
-          for name in clantodesk*??.deb; do
+          for name in rustdesk*??.deb; do
               # use cp to duplicate deb files to fit other packages.
-              cp "$name" "${name%%.deb}-${{ matrix.job.arch }}-sciter.deb"
+              cp "$name" "clantodesk-${{ matrix.job.arch }}-sciter.deb"
           done
 
       - name: Publish debian package
