@@ -1730,9 +1730,10 @@ class _DisplayState extends State<_Display> {
 
   Widget viewStyle(BuildContext context) {
     final isOptFixed = isOptionFixed(kOptionViewStyle);
-    onChanged(String value) async {
-      await bind.mainSetUserDefaultOption(key: kOptionViewStyle, value: value);
-      setState(() {});
+    onChanged(String value) {
+      bind.mainSetUserDefaultOption(key: kOptionViewStyle, value: value).then((_) {
+        setState(() {});
+      });
     }
 
     final groupValue = bind.mainGetUserDefaultOption(key: kOptionViewStyle);
@@ -1752,18 +1753,20 @@ class _DisplayState extends State<_Display> {
 
   Widget scrollStyle(BuildContext context) {
     final isOptFixed = isOptionFixed(kOptionScrollStyle);
-    onChanged(String value) async {
-      await bind.mainSetUserDefaultOption(
-          key: kOptionScrollStyle, value: value);
-      setState(() {});
+    onChanged(String value) {
+      bind.mainSetUserDefaultOption(
+          key: kOptionScrollStyle, value: value).then((_) {
+        setState(() {});
+      });
     }
 
     final groupValue = bind.mainGetUserDefaultOption(key: kOptionScrollStyle);
 
-    onEdgeScrollEdgeThicknessChanged(double value) async {
-      await bind.mainSetUserDefaultOption(
-          key: kOptionEdgeScrollEdgeThickness, value: value.round().toString());
-      setState(() {});
+    onEdgeScrollEdgeThicknessChanged(double value) {
+      bind.mainSetUserDefaultOption(
+          key: kOptionEdgeScrollEdgeThickness, value: value.round().toString()).then((_) {
+        setState(() {});
+      });
     }
 
     return _Card(title: 'Default Scroll Style', children: [
@@ -1798,10 +1801,11 @@ class _DisplayState extends State<_Display> {
   }
 
   Widget imageQuality(BuildContext context) {
-    onChanged(String value) async {
-      await bind.mainSetUserDefaultOption(
-          key: kOptionImageQuality, value: value);
-      setState(() {});
+    onChanged(String value) {
+      bind.mainSetUserDefaultOption(
+          key: kOptionImageQuality, value: value).then((_) {
+        setState(() {});
+      });
     }
 
     final isOptFixed = isOptionFixed(kOptionImageQuality);
@@ -1855,10 +1859,11 @@ class _DisplayState extends State<_Display> {
   }
 
   Widget codec(BuildContext context) {
-    onChanged(String value) async {
-      await bind.mainSetUserDefaultOption(
-          key: kOptionCodecPreference, value: value);
-      setState(() {});
+    onChanged(String value) {
+      bind.mainSetUserDefaultOption(
+          key: kOptionCodecPreference, value: value).then((_) {
+        setState(() {});
+      });
     }
 
     final groupValue =
