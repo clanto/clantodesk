@@ -1880,7 +1880,7 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb appimage/clantodesk.deb
+          mv clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb appimage/rustdesk.deb
 
       - name: Build appimage package
         shell: bash
@@ -1895,7 +1895,7 @@ jobs:
           # run appimage-builder
           pushd appimage
           sudo appimage-builder --skip-tests --recipe ./AppImageBuilder-${{ matrix.job.arch }}.yml
-
+          mv rustdesk-*.AppImage clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.AppImage
       - name: Publish appimage package
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
