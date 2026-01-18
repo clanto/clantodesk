@@ -19,7 +19,7 @@ AppDir:
     name: rustdesk
     icon: rustdesk
     version: 1.4.5
-    exec: usr/share/rustdesk/rustdesk
+    exec: usr/share/rustdesk/clantodesk
     exec_args: $@
   apt:
     arch:
