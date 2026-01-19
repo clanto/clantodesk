@@ -21,6 +21,10 @@ convert icon.png -resize 1024x1024 ../flutter/ios/Runner/Assets.xcassets/AppIcon
 convert 64x64.png icon.pgm
 potrace icon.pgm -s -o scalable.svg
 
+
+cp scalable.svg ../flutter/assets/icon.svg
+
+
 # fom ImageMagick
 convert 16x16.png 32x32.png 48x48.png 128x128.png 256x256.png -colors 256 icon.ico
 #/bin/m 16.png 32.png 48.png 128.png 256.png
