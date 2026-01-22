@@ -529,23 +529,50 @@ jobs:
           name: liblibrustdesk.a
           path: target/aarch64-apple-ios/release/liblibrustdesk.a
 
+      - name: Install the Apple certificate and provisioning profile
+        env:
+          P12_PASSWORD: ${{ secrets.MACOS_P12_PASSWORD }}
+
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # apply provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
       - name: Build rustdesk
         shell: bash
         run: |
           pushd flutter
-          # flutter build ipa --release --obfuscate --split-debug-info=./split-debug-info --no-codesign
-          # for easy debugging
-          flutter build ipa --release --no-codesign
-      
+          # NOTE: We REMOVE --no-codesign because we want it signed now
+          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+
       - name: Publish ipa package
-         # if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
             flutter/build/ios/ipa/*.ipa
-
 
   build-for-macOS:
     name: ${{ matrix.job.target }}
