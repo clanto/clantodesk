@@ -1,5 +1,5 @@
 use crate::{common::do_check_software_update, hbbs_http::create_http_client_with_url};
-use hbb_common::{bail, config, log, ResultType};
+use hbb_common::{bail, config, log, ResultType, get_version_number};
 use std::{
     io::Write,
     path::PathBuf,
@@ -133,7 +133,7 @@ fn check_update(manually: bool) -> ResultType<()> {
         log::debug!("No update available.");
     } else {
         let download_url = update_url.replace("tag", "download");
-        let version = download_url.split('/').last().unwrap_or_default();
+        let version = get_version_number(download_url.split('/').last().unwrap_or_default());
         #[cfg(target_os = "windows")]
         let download_url = if cfg!(feature = "flutter") {
             format!(
