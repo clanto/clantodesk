@@ -256,35 +256,35 @@ pub fn is_valid_custom_id(id: &str) -> bool {
         .unwrap()
         .is_match(id)
 }
+fn is_version_string(s: &str) -> bool {
+    // A version string starts with a digit (e.g., "1.4.5")
+    s.chars().next().map_or(false, |c| c.is_ascii_digit())
+}
 
-// Support 1.1.10-1, the number after - is a patch version.
 pub fn get_version_number(v: &str) -> i64 {
     let mut versions = v.split('-');
+    let mut current = versions.next().unwrap_or("");
+.
+    if !is_version_string(current) {
+        current = versions.next().unwrap_or("");
+    }
 
-    let mut n = 0;
-
-    // The first part is the version number.
-    // 1.1.10 -> 1001100, 1.2.3 -> 1001030, multiple the last number by 10
-    // to leave space for patch version.
-    if let Some(v) = versions.next() {
-        let mut last = 0;
-        for x in v.split('.') {
-            last = x.parse::<i64>().unwrap_or(0);
-            n = n * 1000 + last;
-        }
+    let mut n: i64 = 0;
+    let mut last: i64 = 0;
+    for x in current.split('.') {
+        let cleaned_x: String = x.chars().take_while(|c| c.is_ascii_digit()).collect();
+        last = cleaned_x.parse::<i64>().unwrap_or(0);
+        n = n * 1000 + last;
+    }
         n -= last;
-        n += last * 10;
-    }
+    n += last * 10;
 
-    if let Some(v) = versions.next() {
-        n += v.parse::<i64>().unwrap_or(0);
+    if let Some(next_part) = versions.next() {
+        n += next_part.parse::<i64>().unwrap_or(0);
     }
-
-    // Ignore the rest
 
     n
 }
-
 pub fn get_modified_time(path: &std::path::Path) -> SystemTime {
     std::fs::metadata(path)
         .map(|m| m.modified().unwrap_or(UNIX_EPOCH))
