@@ -264,7 +264,7 @@ fn is_version_string(s: &str) -> bool {
 pub fn get_version_number(v: &str) -> i64 {
     let mut versions = v.split('-');
     let mut current = versions.next().unwrap_or("");
-.
+
     if !is_version_string(current) {
         current = versions.next().unwrap_or("");
     }
