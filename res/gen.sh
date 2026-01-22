@@ -17,10 +17,6 @@ done
 convert icon.png -resize 169x169 ../flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png
 convert icon.png -resize 1024x1024 ../flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png
 
-# svg
-convert 64x64.png icon.pgm
-potrace icon.pgm -s -o scalable.svg
-
 
 cp scalable.svg ../flutter/assets/icon.svg
 

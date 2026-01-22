@@ -1,4 +1,4 @@
-package com.carriez.flutter_hbb
+package it.clanto.clantodesk
 
 import android.Manifest.permission.*
 import android.annotation.SuppressLint

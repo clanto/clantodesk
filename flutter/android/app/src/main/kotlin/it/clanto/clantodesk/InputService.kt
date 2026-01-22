@@ -1,4 +1,4 @@
-package com.carriez.flutter_hbb
+package it.clanto.clantodesk
 
 /**
  * Handle remote input and dispatch android gesture
