@@ -133,20 +133,7 @@ fn check_update(manually: bool) -> ResultType<()> {
         log::debug!("No update available.");
     } else {
         let download_url = update_url.replace("tag", "download");
-        let versions = download_url.split('/').last().unwrap_or_default();
-        let mut version = versions.split("-");
-        version.next()
-        #[cfg(target_os = "windows")]
-        let download_url = if cfg!(feature = "flutter") {
-            format!(
-                "{}/clantodesk-{}-x86_64.{}",
-                download_url,
-                version.unwrap_or("unknown"),
-                if is_msi { "msi" } else { "exe" }
-            )
-        } else {
-            format!("{}/clantodesk-{}-x86-sciter.exe", download_url, version.to_string())
-        };
+        let version = download_url.split('/').last().unwrap_or_default();
         log::debug!("New version available: {}", &version);
         let client = create_http_client_with_url(&download_url);
         let Some(file_path) = get_download_file_from_url(&download_url) else {
