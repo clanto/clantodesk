@@ -132,8 +132,19 @@ fn check_update(manually: bool) -> ResultType<()> {
     if update_url.is_empty() {
         log::debug!("No update available.");
     } else {
-        let download_url = update_url.replace("tag", "download");
-        let version = download_url.split('/').last().unwrap_or_default();
+        let download_base_url = update_url.replace("tag", "download");
+        let version = download_base_url.split('/').last().unwrap_or_default();
+        #[cfg(target_os = "windows")]
+        let download_url = {
+            let filename = if is_msi {
+                format!("clantodesk-{}-x86_64.msi", version)
+            } else {
+                format!("clantodesk-{}-x86_64.exe", version)
+            };
+            format!("{}/{}", download_base_url, filename)
+        };
+        #[cfg(not(target_os = "windows"))]
+        let download_url = download_base_url;
         log::debug!("New version available: {}", &version);
         let client = create_http_client_with_url(&download_url);
         let Some(file_path) = get_download_file_from_url(&download_url) else {
