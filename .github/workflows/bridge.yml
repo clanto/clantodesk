@@ -27,7 +27,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: recursive
           
       - name: Install prerequisites
         run: |
