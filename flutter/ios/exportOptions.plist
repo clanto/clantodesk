@@ -9,7 +9,7 @@
  <key>provisioningProfiles</key>
  <dict>
  <key>it.clanto.clantodesk</key>
- <string>rustdesk-ios-prod-app-store</string>
+ <string>clantodesk_profile</string>
  </dict>
  </dict>
  </plist>

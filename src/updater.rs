@@ -133,7 +133,10 @@ fn check_update(manually: bool) -> ResultType<()> {
         log::debug!("No update available.");
     } else {
         let download_base_url = update_url.replace("tag", "download");
-        let version = download_base_url.split('/').last().unwrap_or_default();
+        let version = download_base_url
+            .split('/')
+            .last()
+            .unwrap_or_default();
         #[cfg(target_os = "windows")]
         let download_url = {
             let filename = if is_msi {
@@ -144,7 +147,7 @@ fn check_update(manually: bool) -> ResultType<()> {
             format!("{}/{}", download_base_url, filename)
         };
         #[cfg(not(target_os = "windows"))]
-        let download_url = download_base_url;
+        let download_url = download_base_url.clone();
         log::debug!("New version available: {}", &version);
         let client = create_http_client_with_url(&download_url);
         let Some(file_path) = get_download_file_from_url(&download_url) else {
