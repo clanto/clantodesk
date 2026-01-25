@@ -1261,9 +1261,11 @@ jobs:
           # build flutter
           pushd flutter
           flutter build apk "--${{ env.reltype }}" --target-platform android-arm64,android-arm,android-x64${{ env.x86_target }}
+          flutter build appbundle "--${{ env.reltype }}"
           popd
           mkdir -p signed-apk
           mv ./flutter/build/app/outputs/flutter-apk/app-${{ env.reltype }}.apk signed-apk/clantodesk-${{ env.VERSION }}-universal${{ env.suffix }}.apk
+          mv ./flutter/build/app/outputs/bundle/${{ env.reltype }}/app-${{ env.reltype }}.aab signed-apk/clantodesk-${{ env.VERSION }}-universal${{ env.suffix }}.aab
 
       # https://github.com/r0adkll/sign-android-release/issues/84#issuecomment-1889636075
       - name: Setup sign tool version variable

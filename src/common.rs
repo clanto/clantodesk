@@ -122,6 +122,7 @@ impl Drop for SimpleCallOnReturn {
 }
 
 pub fn global_init() -> bool {
+    *config::APP_NAME.write().unwrap() = "ClantoDesk".to_owned();
     #[cfg(target_os = "linux")]
     {
         if !crate::platform::linux::is_x11() {
