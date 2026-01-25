@@ -123,6 +123,40 @@ impl Drop for SimpleCallOnReturn {
 
 pub fn global_init() -> bool {
     *config::APP_NAME.write().unwrap() = "ClantoDesk".to_owned();
+    if let Some(rendezvous_server) = option_env!("RENDEZVOUS_SERVER") {
+        if !rendezvous_server.is_empty() {
+            *config::PROD_RENDEZVOUS_SERVER.write().unwrap() = rendezvous_server.to_owned();
+            config::DEFAULT_SETTINGS
+                .write()
+                .unwrap()
+                .insert("custom-rendezvous-server".to_owned(), rendezvous_server.to_owned());
+        }
+    }
+    if let Some(rs_pub_key) = option_env!("RS_PUB_KEY") {
+        if !rs_pub_key.is_empty() {
+            config::DEFAULT_SETTINGS
+                .write()
+                .unwrap()
+                .insert("key".to_owned(), rs_pub_key.to_owned());
+        }
+    }
+    if let Some(api_server) = option_env!("API_SERVER") {
+        if !api_server.is_empty() {
+            config::DEFAULT_SETTINGS
+                .write()
+                .unwrap()
+                .insert("api-server".to_owned(), api_server.to_owned());
+        }
+    }
+    log::info!(
+        "Server config: using_public_server={}, rendezvous_server={}, api_server={}",
+        using_public_server(),
+        Config::get_rendezvous_server(),
+        get_api_server(
+            Config::get_option("api-server"),
+            Config::get_option("custom-rendezvous-server")
+        )
+    );
     #[cfg(target_os = "linux")]
     {
         if !crate::platform::linux::is_x11() {

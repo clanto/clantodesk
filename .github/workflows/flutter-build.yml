@@ -559,7 +559,10 @@ jobs:
 
           # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+          PROFILE_UUID=$(security cms -D -i "$PP_PATH" | /usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin)
+          PROFILE_NAME=$(security cms -D -i "$PP_PATH" | /usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin)
+          echo "Installed profile: $PROFILE_NAME ($PROFILE_UUID)"
+          cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
 
       - name: Build rustdesk
         shell: bash
