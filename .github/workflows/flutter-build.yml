@@ -631,15 +631,15 @@ jobs:
       - name: Fix iOS icons (remove alpha channel and generate missing sizes)
         run: |
           cd flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset
-          # Remove alpha channel from all icons (required for App Store)
-          for icon in *.png; do
-            sips -s format png -s formatOptions 100 "$icon" --out "$icon"
-            # Convert to RGB without alpha using sips
-            sips -s hasAlpha false "$icon" --out "$icon" || true
-          done
+          # Remove alpha channel ONLY from 1024x1024 icon (required for App Store)
+          # Other icons need transparency for rounded corners
+          if [ -f "Icon-App-1024x1024@1x.png" ]; then
+            sips -s format jpeg Icon-App-1024x1024@1x.png --out temp_1024.jpg
+            sips -s format png temp_1024.jpg --out Icon-App-1024x1024@1x.png
+            rm -f temp_1024.jpg
+          fi
           # Generate 167x167 icon for iPad Pro from 1024x1024 icon
           sips -z 167 167 Icon-App-1024x1024@1x.png --out Icon-App-83.5x83.5@2x.png
-          sips -s hasAlpha false Icon-App-83.5x83.5@2x.png --out Icon-App-83.5x83.5@2x.png || true
 
       - name: Build rustdesk
         shell: bash
@@ -860,14 +860,13 @@ jobs:
           codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict clantodesk-${{ env.VERSION }}.dmg -vvv
           # Notarize the DMG (only if secrets are configured)
           if [ -n "${{ secrets.MACOS_NOTARIZE_KEY_ID }}" ] && [ -n "${{ secrets.MACOS_NOTARIZE_ISSUER_ID }}" ] && [ -f "${{ github.workspace }}/api_key.p8" ]; then
-            echo "Generating API key JSON with rcodesign..."
-            rcodesign encode-app-store-connect-api-key \
-              -o ${{ github.workspace }}/notarize.json \
-              ${{ secrets.MACOS_NOTARIZE_ISSUER_ID }} \
-              ${{ secrets.MACOS_NOTARIZE_KEY_ID }} \
-              ${{ github.workspace }}/api_key.p8
             echo "Notarizing DMG..."
-            rcodesign notary-submit --api-key ${{ github.workspace }}/notarize.json --staple clantodesk-${{ env.VERSION }}.dmg
+            rcodesign notary-submit \
+              --api-issuer ${{ secrets.MACOS_NOTARIZE_ISSUER_ID }} \
+              --api-key ${{ secrets.MACOS_NOTARIZE_KEY_ID }} \
+              --api-key-path ${{ github.workspace }}/api_key.p8 \
+              --staple \
+              clantodesk-${{ env.VERSION }}.dmg
           else
             echo "Skipping notarization - MACOS_NOTARIZE secrets not configured"
           fi
