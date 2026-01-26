@@ -860,11 +860,15 @@ jobs:
           codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict clantodesk-${{ env.VERSION }}.dmg -vvv
           # Notarize the DMG (only if secrets are configured)
           if [ -n "${{ secrets.MACOS_NOTARIZE_KEY_ID }}" ] && [ -n "${{ secrets.MACOS_NOTARIZE_ISSUER_ID }}" ] && [ -f "${{ github.workspace }}/api_key.p8" ]; then
+            echo "Generating API key JSON..."
+            rcodesign encode-app-store-connect-api-key \
+              ${{ secrets.MACOS_NOTARIZE_ISSUER_ID }} \
+              ${{ secrets.MACOS_NOTARIZE_KEY_ID }} \
+              ${{ github.workspace }}/api_key.p8 \
+              > ${{ github.workspace }}/api_key.json
             echo "Notarizing DMG..."
             rcodesign notary-submit \
-              --api-issuer ${{ secrets.MACOS_NOTARIZE_ISSUER_ID }} \
-              --api-key ${{ secrets.MACOS_NOTARIZE_KEY_ID }} \
-              --api-key-path ${{ github.workspace }}/api_key.p8 \
+              --api-key-path ${{ github.workspace }}/api_key.json \
               --staple \
               clantodesk-${{ env.VERSION }}.dmg
           else
