@@ -628,12 +628,18 @@ jobs:
           cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
           echo "Provisioning profile installed successfully"
 
-      - name: Generate missing iPad Pro icon
+      - name: Fix iOS icons (remove alpha channel and generate missing sizes)
         run: |
-          # Generate 167x167 icon for iPad Pro from 1024x1024 icon
-          brew install imagemagick
           cd flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset
+          # Remove alpha channel from all icons (required for App Store)
+          for icon in *.png; do
+            sips -s format png -s formatOptions 100 "$icon" --out "$icon"
+            # Convert to RGB without alpha using sips
+            sips -s hasAlpha false "$icon" --out "$icon" || true
+          done
+          # Generate 167x167 icon for iPad Pro from 1024x1024 icon
           sips -z 167 167 Icon-App-1024x1024@1x.png --out Icon-App-83.5x83.5@2x.png
+          sips -s hasAlpha false Icon-App-83.5x83.5@2x.png --out Icon-App-83.5x83.5@2x.png || true
 
       - name: Build rustdesk
         shell: bash
@@ -861,7 +867,7 @@ jobs:
               ${{ secrets.MACOS_NOTARIZE_KEY_ID }} \
               ${{ github.workspace }}/api_key.p8
             echo "Notarizing DMG..."
-            rcodesign notary-submit --api-key-file ${{ github.workspace }}/notarize.json --staple clantodesk-${{ env.VERSION }}.dmg
+            rcodesign notary-submit --api-key ${{ github.workspace }}/notarize.json --staple clantodesk-${{ env.VERSION }}.dmg
           else
             echo "Skipping notarization - MACOS_NOTARIZE secrets not configured"
           fi
