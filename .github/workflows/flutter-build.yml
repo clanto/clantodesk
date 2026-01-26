@@ -588,14 +588,32 @@ jobs:
         run: |
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           
-          # Remove newlines and spaces from base64 before decoding
-          echo "$PROVISIONING_PROFILE_BASE64" | tr -d '\n\r ' | base64 --decode -o $PP_PATH
+          # Decode base64 to provisioning profile file
+          printf '%s' "$PROVISIONING_PROFILE_BASE64" | tr -d '[:space:]' | base64 --decode > $PP_PATH
           
+          # Verify the file was created and has content
+          if [ ! -s "$PP_PATH" ]; then
+            echo "ERROR: Provisioning profile decode failed - file is empty"
+            echo "Secret length: ${#PROVISIONING_PROFILE_BASE64}"
+            exit 1
+          fi
+          
+          echo "Provisioning profile decoded successfully ($(wc -c < $PP_PATH) bytes)"
+          
+          # Extract UUID using grep (standard method, more reliable than security cms)
+          PROFILE_UUID=$(grep -a -A1 'UUID' "$PP_PATH" | grep -o '[-A-F0-9]\{36\}' | head -1)
+          
+          if [ -z "$PROFILE_UUID" ]; then
+            echo "ERROR: Could not extract UUID from provisioning profile"
+            echo "File content preview:"
+            head -c 200 "$PP_PATH" | od -c
+            exit 1
+          fi
+          
+          echo "Installing profile with UUID: $PROFILE_UUID"
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          PROFILE_UUID=$(security cms -D -i "$PP_PATH" | /usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin)
-          PROFILE_NAME=$(security cms -D -i "$PP_PATH" | /usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin)
-          echo "Installing profile: $PROFILE_NAME ($PROFILE_UUID)"
           cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
+          echo "Provisioning profile installed successfully"
 
       - name: Build rustdesk
         shell: bash
