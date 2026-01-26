@@ -7,7 +7,7 @@ $raw = file_get_contents('php://input');
 $request = json_decode($raw, true);
 
 $UPDATE_ENABLED = true; // true = allow updates, false = block updates
-$LATEST_TAG = '1.4.6'; // e.g. 1.4.5, 1.4.6
+$LATEST_TAG = '1.4.5'; // e.g. 1.4.5, 1.4.6
 
 if (!$UPDATE_ENABLED) {
     // Return a non-upgrade version to prevent updates
