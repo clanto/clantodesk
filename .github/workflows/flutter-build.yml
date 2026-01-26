@@ -1310,7 +1310,7 @@ jobs:
           
           # Create key.properties for release signing (Flutter official method)
           if [ "${{ env.reltype }}" = "release" ]; then
-            echo "$ANDROID_SIGNING_KEY" | base64 --decode > ./flutter/android/upload-keystore.jks
+            echo "$ANDROID_SIGNING_KEY" | base64 --decode > ./flutter/android/app/upload-keystore.jks
             cat > ./flutter/android/key.properties << EOF
           storePassword=clantodesk
           keyPassword=clantodesk
