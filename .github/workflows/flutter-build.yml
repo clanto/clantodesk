@@ -545,6 +545,14 @@ jobs:
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
           # import certificate and provisioning profile from secrets
+          echo "Certificate secret length: ${#BUILD_CERTIFICATE_BASE64}"
+          echo "Provisioning profile secret length: ${#PROVISIONING_PROFILE_BASE64}"
+          
+          if [ -z "$PROVISIONING_PROFILE_BASE64" ]; then
+            echo "ERROR: PROVISIONING_PROFILE_BASE64 is empty!"
+            exit 1
+          fi
+          
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
 
@@ -1134,7 +1142,6 @@ jobs:
   build-rustdesk-android-universal:
     needs: [build-rustdesk-android]
     name: build rustdesk android universal apk
-    if: ${{ inputs.upload-artifact }}
     runs-on: ubuntu-24.04
     env:
       reltype: release
