@@ -629,6 +629,10 @@ jobs:
         shell: bash
         run: |
           pushd flutter
+          # Disable automatic signing in Xcode project to use manually installed provisioning profile
+          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
+          # Set the provisioning profile UUID
+          sed -i '' "s/DEVELOPMENT_TEAM = .*;/DEVELOPMENT_TEAM = DCP3L7L7BW;/g" ios/Runner.xcodeproj/project.pbxproj
           # NOTE: We REMOVE --no-codesign because we want it signed now
           flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
 
@@ -839,7 +843,8 @@ jobs:
           codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict ./flutter/build/macos/Build/Products/Release/ClantoDesk.app -vvv
           create-dmg --icon "ClantoDesk.app" 200 190 --hide-extension "ClantoDesk.app" --window-size 800 400 --app-drop-link 600 185 clantodesk-${{ env.VERSION }}.dmg ./flutter/build/macos/Build/Products/Release/ClantoDesk.app
           codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict clantodesk-${{ env.VERSION }}.dmg -vvv
-          # notarize the clantodesk-${{ env.VERSION }}.dmg
+          # Notarize the DMG
+          rcodesign notary-submit --api-key-path ${{ github.workspace }}/rustdesk.json --staple clantodesk-${{ env.VERSION }}.dmg
 
       - name: Rename rustdesk
         if: env.UPLOAD_ARTIFACT == 'true'
@@ -857,48 +862,49 @@ jobs:
           files: |
             clantodesk*-${{ matrix.job.arch }}.dmg
 
-  publish_unsigned:
-    needs:
-      - build-for-macOS
-      - build-for-windows-flutter
-      - build-for-windows-sciter
-    runs-on: ubuntu-latest
-    if: ${{ inputs.upload-artifact }}
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@master
-        with:
-          name: clantodesk-unsigned-macos-x86_64
-          path: ./
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@master
-        with:
-          name: clantodesk-unsigned-macos-aarch64
-          path: ./
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@master
-        with:
-          name: clantodesk-unsigned-windows-x86_64
-          path: ./windows-x86_64/
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@master
-        with:
-          name: clantodesk-unsigned-windows-x86
-          path: ./windows-x86/
-
-      - name: Combine unsigned app
-        run: |
-          tar czf clantodesk-${{ env.VERSION }}-unsigned.tar.gz *.dmg windows-x86_64 windows-x86
-
-      - name: Publish unsigned app
-        uses: softprops/action-gh-release@v1
-        with:
-          prerelease: true
-          tag_name: ${{ env.TAG_NAME }}
-          files: clantodesk-${{ env.VERSION }}-unsigned.tar.gz
+  # Temporarily disabled - re-enable after all platform builds are working
+  # publish_unsigned:
+  #   needs:
+  #     - build-for-macOS
+  #     - build-for-windows-flutter
+  #     - build-for-windows-sciter
+  #   runs-on: ubuntu-latest
+  #   if: ${{ inputs.upload-artifact }}
+  #   steps:
+  #     - name: Download artifacts
+  #       uses: actions/download-artifact@master
+  #       with:
+  #         name: clantodesk-unsigned-macos-x86_64
+  #         path: ./
+  #
+  #     - name: Download Artifacts
+  #       uses: actions/download-artifact@master
+  #       with:
+  #         name: clantodesk-unsigned-macos-aarch64
+  #         path: ./
+  #
+  #     - name: Download Artifacts
+  #       uses: actions/download-artifact@master
+  #       with:
+  #         name: clantodesk-unsigned-windows-x86_64
+  #         path: ./windows-x86_64/
+  #
+  #     - name: Download Artifacts
+  #       uses: actions/download-artifact@master
+  #       with:
+  #         name: clantodesk-unsigned-windows-x86
+  #         path: ./windows-x86/
+  #
+  #     - name: Combine unsigned app
+  #       run: |
+  #         tar czf clantodesk-${{ env.VERSION }}-unsigned.tar.gz *.dmg windows-x86_64 windows-x86
+  #
+  #     - name: Publish unsigned app
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         prerelease: true
+  #         tag_name: ${{ env.TAG_NAME }}
+  #         files: clantodesk-${{ env.VERSION }}-unsigned.tar.gz
 
   build-rustdesk-android:
     needs: [generate-bridge]
