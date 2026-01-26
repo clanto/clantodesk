@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=ClantoDesk
+NoDisplay=true
+MimeType=x-scheme-handler/clantodesk;
+TryExec=clantodesk
+Exec=clantodesk %u
+Icon=clantodesk
+Terminal=false
+Type=Application
+StartupNotify=false
+StartupWMClass=clantodesk
