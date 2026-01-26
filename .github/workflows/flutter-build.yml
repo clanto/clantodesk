@@ -44,7 +44,9 @@ env:
   #signing keys env variable checks
   ANDROID_SIGNING_KEY: "${{ secrets.ANDROID_SIGNING_KEY }}"
   MACOS_P12_BASE64: "${{ secrets.MACOS_P12_BASE64 }}"
-  MACOS_NOTARIZE_JSON: "${{ secrets.MACOS_NOTARIZE_JSON }}"
+  MACOS_NOTARIZE_KEY_ID: "${{ secrets.MACOS_NOTARIZE_KEY_ID }}"
+  MACOS_NOTARIZE_ISSUER_ID: "${{ secrets.MACOS_NOTARIZE_ISSUER_ID }}"
+  MACOS_NOTARIZE_KEY: "${{ secrets.MACOS_NOTARIZE_KEY }}"
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL != '' && format('{0}-2', secrets.SIGN_BASE_URL) || '' }}"
   # Azure Trusted Signing configuration
@@ -703,16 +705,15 @@ jobs:
           security find-identity -v
 
       - name: Import notarize key
-        if: env.MACOS_NOTARIZE_JSON != null
-        uses: timheuer/base64-to-file@v1.2
-        with:
-          # https://gregoryszorc.com/docs/apple-codesign/stable/apple_codesign_rcodesign.html#notarizing-and-stapling
-          fileName: rustdesk.json
-          fileDir: ${{ github.workspace }}
-          encodedString: ${{ secrets.MACOS_NOTARIZE_JSON }}
+        if: env.MACOS_NOTARIZE_KEY != null
+        run: |
+          # Write the App Store Connect API Key (.p8 content) directly
+          cat << 'EOF' > ${{ github.workspace }}/api_key.p8
+          ${{ secrets.MACOS_NOTARIZE_KEY }}
+          EOF
 
       - name: Install rcodesign tool
-        if: env.MACOS_NOTARIZE_JSON != null
+        if: env.MACOS_NOTARIZE_KEY != null
         shell: bash
         run: |
           pushd /tmp
@@ -851,12 +852,18 @@ jobs:
           codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict ./flutter/build/macos/Build/Products/Release/ClantoDesk.app -vvv
           create-dmg --icon "ClantoDesk.app" 200 190 --hide-extension "ClantoDesk.app" --window-size 800 400 --app-drop-link 600 185 clantodesk-${{ env.VERSION }}.dmg ./flutter/build/macos/Build/Products/Release/ClantoDesk.app
           codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict clantodesk-${{ env.VERSION }}.dmg -vvv
-          # Notarize the DMG (only if secret is configured)
-          if [ -n "${{ secrets.MACOS_NOTARIZE_JSON }}" ] && [ -f "${{ github.workspace }}/rustdesk.json" ]; then
+          # Notarize the DMG (only if secrets are configured)
+          if [ -n "${{ secrets.MACOS_NOTARIZE_KEY_ID }}" ] && [ -n "${{ secrets.MACOS_NOTARIZE_ISSUER_ID }}" ] && [ -f "${{ github.workspace }}/api_key.p8" ]; then
+            echo "Generating API key JSON with rcodesign..."
+            rcodesign encode-app-store-connect-api-key \
+              -o ${{ github.workspace }}/notarize.json \
+              ${{ secrets.MACOS_NOTARIZE_ISSUER_ID }} \
+              ${{ secrets.MACOS_NOTARIZE_KEY_ID }} \
+              ${{ github.workspace }}/api_key.p8
             echo "Notarizing DMG..."
-            rcodesign notary-submit --api-key-path ${{ github.workspace }}/rustdesk.json --staple clantodesk-${{ env.VERSION }}.dmg
+            rcodesign notary-submit --api-key-file ${{ github.workspace }}/notarize.json --staple clantodesk-${{ env.VERSION }}.dmg
           else
-            echo "Skipping notarization - MACOS_NOTARIZE_JSON secret not configured"
+            echo "Skipping notarization - MACOS_NOTARIZE secrets not configured"
           fi
           
       - name: Rename rustdesk
@@ -1653,7 +1660,7 @@ jobs:
             export CARGO_INCREMENTAL=0
             export DEB_ARCH=${{ matrix.job.deb_arch }}
             python3 ./build.py --flutter --skip-cargo
-            for name in rustdesk*??.deb; do
+            for name in clantodesk*.deb; do
               mv "$name" "clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb"
             done
 
@@ -1936,7 +1943,7 @@ jobs:
       - name: Rename rustdesk
         shell: bash
         run: |
-          for name in rustdesk*??.deb; do
+          for name in clantodesk*.deb; do
               # use cp to duplicate deb files to fit other packages.
               cp "$name" "clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb"
           done
