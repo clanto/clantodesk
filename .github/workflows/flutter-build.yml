@@ -601,7 +601,7 @@ jobs:
           echo "Provisioning profile decoded successfully ($(wc -c < $PP_PATH) bytes)"
           
           # Extract UUID using grep (standard method, more reliable than security cms)
-          PROFILE_UUID=$(grep -a -A1 'UUID' "$PP_PATH" | grep -o '[-A-F0-9]\{36\}' | head -1)
+          PROFILE_UUID=$(grep -a -A1 'UUID' "$PP_PATH" | grep -io '[-A-F0-9]\{36\}' | head -1)
           
           if [ -z "$PROFILE_UUID" ]; then
             echo "ERROR: Could not extract UUID from provisioning profile"
@@ -1303,12 +1303,12 @@ jobs:
           
           # Create key.properties for release signing (Flutter official method)
           if [ "${{ env.reltype }}" = "release" ]; then
-            echo "$ANDROID_SIGNING_KEY" | base64 --decode > ./flutter/android/app/upload-keystore.jks
+            echo "$ANDROID_SIGNING_KEY" | base64 --decode > ./flutter/android/upload-keystore.jks
             cat > ./flutter/android/key.properties << EOF
           storePassword=clantodesk
           keyPassword=clantodesk
           keyAlias=upload
-          storeFile=app/upload-keystore.jks
+          storeFile=upload-keystore.jks
           EOF
           else
             # For debug builds, use debug signing
