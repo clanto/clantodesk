@@ -600,11 +600,18 @@ jobs:
           
           echo "Provisioning profile decoded successfully ($(wc -c < $PP_PATH) bytes)"
           
-          # Extract UUID using grep (standard method, more reliable than security cms)
-          PROFILE_UUID=$(grep -a -A1 'UUID' "$PP_PATH" | grep -io '[-A-F0-9]\{36\}' | head -1)
+          # Extract UUID using security cms and PlistBuddy (Apple standard method)
+          PROFILE_UUID=$(security cms -D -i "$PP_PATH" 2>/dev/null | plutil -convert xml1 -o - - 2>/dev/null | grep -A1 '<key>UUID</key>' | grep '<string>' | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
           
           if [ -z "$PROFILE_UUID" ]; then
             echo "ERROR: Could not extract UUID from provisioning profile"
+            echo "Trying alternative method..."
+            # Fallback: extract raw UUID pattern from binary file
+            PROFILE_UUID=$(strings "$PP_PATH" | grep -E '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' | head -1)
+          fi
+          
+          if [ -z "$PROFILE_UUID" ]; then
+            echo "ERROR: Could not extract UUID with any method"
             echo "File content preview:"
             head -c 200 "$PP_PATH" | od -c
             exit 1
