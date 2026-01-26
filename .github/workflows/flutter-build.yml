@@ -44,6 +44,7 @@ env:
   #signing keys env variable checks
   ANDROID_SIGNING_KEY: "${{ secrets.ANDROID_SIGNING_KEY }}"
   MACOS_P12_BASE64: "${{ secrets.MACOS_P12_BASE64 }}"
+  MACOS_NOTARIZE_JSON: "${{ secrets.MACOS_NOTARIZE_JSON }}"
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL != '' && format('{0}-2', secrets.SIGN_BASE_URL) || '' }}"
   # Azure Trusted Signing configuration
@@ -695,7 +696,7 @@ jobs:
           security find-identity -v
 
       - name: Import notarize key
-        if: env.MACOS_P12_BASE64 != null
+        if: env.MACOS_NOTARIZE_JSON != null
         uses: timheuer/base64-to-file@v1.2
         with:
           # https://gregoryszorc.com/docs/apple-codesign/stable/apple_codesign_rcodesign.html#notarizing-and-stapling
@@ -704,7 +705,7 @@ jobs:
           encodedString: ${{ secrets.MACOS_NOTARIZE_JSON }}
 
       - name: Install rcodesign tool
-        if: env.MACOS_P12_BASE64 != null
+        if: env.MACOS_NOTARIZE_JSON != null
         shell: bash
         run: |
           pushd /tmp
@@ -843,9 +844,14 @@ jobs:
           codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict ./flutter/build/macos/Build/Products/Release/ClantoDesk.app -vvv
           create-dmg --icon "ClantoDesk.app" 200 190 --hide-extension "ClantoDesk.app" --window-size 800 400 --app-drop-link 600 185 clantodesk-${{ env.VERSION }}.dmg ./flutter/build/macos/Build/Products/Release/ClantoDesk.app
           codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict clantodesk-${{ env.VERSION }}.dmg -vvv
-          # Notarize the DMG
-          rcodesign notary-submit --api-key-path ${{ github.workspace }}/rustdesk.json --staple clantodesk-${{ env.VERSION }}.dmg
-
+          # Notarize the DMG (only if secret is configured)
+          if [ -n "${{ secrets.MACOS_NOTARIZE_JSON }}" ] && [ -f "${{ github.workspace }}/rustdesk.json" ]; then
+            echo "Notarizing DMG..."
+            rcodesign notary-submit --api-key-path ${{ github.workspace }}/rustdesk.json --staple clantodesk-${{ env.VERSION }}.dmg
+          else
+            echo "Skipping notarization - MACOS_NOTARIZE_JSON secret not configured"
+          fi
+          
       - name: Rename rustdesk
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
