@@ -39,6 +39,81 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '11.0'
     end
+    
+    # Add Privacy Manifest for frameworks that don't include one
+    frameworks_needing_manifest = [
+      'DKImagePickerController',
+      'DKPhotoGallery',
+      'SwiftyGif',
+      'device_info_plus',
+      'file_picker',
+      'package_info_plus',
+      'sqflite'
+    ]
+    
+    if frameworks_needing_manifest.include?(target.name)
+      privacy_manifest_path = "#{target.sandbox_dir}/PrivacyInfo.xcprivacy"
+      unless File.exist?(privacy_manifest_path)
+        privacy_manifest_content = <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>C617.1</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategorySystemBootTime</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>35F9.1</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryDiskSpace</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>E174.1</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
+XML
+        File.write(privacy_manifest_path, privacy_manifest_content)
+        
+        # Add the privacy manifest to the framework's resources
+        target.build_phases.each do |phase|
+          if phase.is_a?(Xcodeproj::Project::Object::PBXResourcesBuildPhase)
+            file_ref = installer.pods_project.new_file(privacy_manifest_path)
+            phase.add_file_reference(file_ref)
+          end
+        end
+      end
+    end
   end
 end
 
