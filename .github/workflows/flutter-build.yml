@@ -1683,7 +1683,7 @@ jobs:
             esac
             HBB=`pwd` rpmbuild ./res/rpm-flutter.spec -bb
             pushd ~/rpmbuild/RPMS/${{ matrix.job.arch }}
-            for name in rustdesk*??.rpm; do
+            for name in clantodesk*??.rpm; do
                 mv "$name" /workspace/"clantodesk.rpm"
             done
 
@@ -1697,7 +1697,7 @@ jobs:
             esac
             HBB=`pwd` rpmbuild ./res/rpm-flutter-suse.spec -bb
             pushd ~/rpmbuild/RPMS/${{ matrix.job.arch }}
-            for name in rustdesk*??.rpm; do
+            for name in clantodesk*??.rpm; do
                 mv "$name" /workspace/clantodesk-suse.rpm
             done
 
