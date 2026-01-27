@@ -660,6 +660,75 @@ jobs:
           files: |
             flutter/build/ios/ipa/*.ipa
 
+  build-rustdesk-ios-simulator:
+    if: ${{ inputs.upload-artifact }}
+    name: build rustdesk ios simulator app
+    runs-on: macos-14
+    needs: [generate-bridge]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          brew install nasm yasm
+
+      - name: Install flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Patch flutter
+        run: |
+          cd $(dirname $(dirname $(which flutter)))
+          [[ "3.24.5" == ${{env.FLUTTER_VERSION}} ]] && git apply ${{ github.workspace }}/.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: aarch64-apple-ios-sim
+          components: "rustfmt"
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: rustdesk-lib-cache-ios-sim
+          key: aarch64-apple-ios-sim
+
+      - name: Restore bridge files
+        uses: actions/download-artifact@master
+        with:
+          name: bridge-artifact
+          path: ./
+
+      - name: Build rustdesk lib for simulator
+        run: |
+          rustup target add aarch64-apple-ios-sim
+          cargo build --features flutter,hwcodec --release --target aarch64-apple-ios-sim --lib
+
+      - name: Build Flutter app for simulator
+        shell: bash
+        run: |
+          pushd flutter
+          flutter build ios --simulator --release --no-codesign
+          popd
+
+      - name: Create simulator app archive
+        run: |
+          cd flutter/build/ios/iphonesimulator
+          zip -r clantodesk-${{ env.VERSION }}-ios-simulator-arm64.zip Runner.app
+
+      - name: Publish simulator app package
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: true
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            flutter/build/ios/iphonesimulator/clantodesk-${{ env.VERSION }}-ios-simulator-arm64.zip
+
   build-for-macOS:
     name: ${{ matrix.job.target }}
     runs-on: ${{ matrix.job.os }}
