@@ -1613,6 +1613,9 @@ jobs:
             # start build
             pushd /workspace
             export VCPKG_ROOT=/opt/artifacts/vcpkg
+            export RENDEZVOUS_SERVER="${{ env.RENDEZVOUS_SERVER }}"
+            export RS_PUB_KEY="${{ env.RS_PUB_KEY }}"
+            export API_SERVER="${{ env.API_SERVER }}"
             if [[ "${{ matrix.job.arch }}" == "aarch64" ]]; then
               export JOBS="--jobs 3"
             else
@@ -2006,7 +2009,7 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb appimage/rustdesk.deb
+          mv clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb appimage/clantodesk.deb
 
       - name: Build appimage package
         shell: bash
