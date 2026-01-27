@@ -52,7 +52,10 @@ post_install do |installer|
     ]
     
     if frameworks_needing_manifest.include?(target.name)
-      privacy_manifest_path = "#{target.sandbox_dir}/PrivacyInfo.xcprivacy"
+      pod_dir = installer.sandbox.pod_dir(target.name)
+      next unless pod_dir
+      
+      privacy_manifest_path = "#{pod_dir}/PrivacyInfo.xcprivacy"
       unless File.exist?(privacy_manifest_path)
         privacy_manifest_content = <<-XML
 <?xml version="1.0" encoding="UTF-8"?>
