@@ -651,6 +651,14 @@ jobs:
           sed -i '' "s/DEVELOPMENT_TEAM = .*;/DEVELOPMENT_TEAM = DCP3L7L7BW;/g" ios/Runner.xcodeproj/project.pbxproj
           # NOTE: We REMOVE --no-codesign because we want it signed now
           flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+          popd
+
+      - name: Rename IPA with version and architecture
+        run: |
+          cd flutter/build/ios/ipa
+          for name in *.ipa; do
+            mv "$name" "clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.ipa"
+          done
 
       - name: Publish ipa package
         uses: softprops/action-gh-release@v1
@@ -658,7 +666,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            flutter/build/ios/ipa/*.ipa
+            flutter/build/ios/ipa/clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}.ipa
 
   build-for-macOS:
     name: ${{ matrix.job.target }}
@@ -1683,7 +1691,7 @@ jobs:
             esac
             HBB=`pwd` rpmbuild ./res/rpm-flutter.spec -bb
             pushd ~/rpmbuild/RPMS/${{ matrix.job.arch }}
-            for name in clantodesk*??.rpm; do
+            for name in clantodesk*.rpm; do
                 mv "$name" /workspace/"clantodesk.rpm"
             done
 
@@ -1697,7 +1705,7 @@ jobs:
             esac
             HBB=`pwd` rpmbuild ./res/rpm-flutter-suse.spec -bb
             pushd ~/rpmbuild/RPMS/${{ matrix.job.arch }}
-            for name in clantodesk*??.rpm; do
+            for name in clantodesk*.rpm; do
                 mv "$name" /workspace/clantodesk-suse.rpm
             done
 
