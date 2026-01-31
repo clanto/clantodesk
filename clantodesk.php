@@ -42,13 +42,13 @@ $FILES = [
     'linux_flat_arm' => "clantodesk-{$LATEST_TAG}-aarch64.flatpak",
     
     // Linux RPM (Fedora/openSUSE)
-    'linux_rpm_x64'  => "clantodesk-{$LATEST_TAG}-0.x86_64.rpm",
-    'linux_rpm_arm'  => "clantodesk-{$LATEST_TAG}-0.aarch64.rpm",
-    'linux_rpm_suse_x64' => "clantodesk-{$LATEST_TAG}-0.x86_64-suse.rpm",
-    'linux_rpm_suse_arm' => "clantodesk-{$LATEST_TAG}-0.aarch64-suse.rpm",
+    'linux_rpm_x64'  => "clantodesk-{$LATEST_TAG}-x86_64.rpm",
+    'linux_rpm_arm'  => "clantodesk-{$LATEST_TAG}-aarch64.rpm",
+    'linux_rpm_suse_x64' => "clantodesk-{$LATEST_TAG}-x86_64-suse.rpm",
+    'linux_rpm_suse_arm' => "clantodesk-{$LATEST_TAG}-aarch64-suse.rpm",
     
     // Android APK
-    'android_univ'   => "clantodesk-{$LATEST_TAG}-universal-signed.apk",
+    'android_univ'   => "clantodesk-{$LATEST_TAG}-universal.apk",
     'android_x64'    => "clantodesk-{$LATEST_TAG}-x86_64-signed.apk",
     'android_arm'    => "clantodesk-{$LATEST_TAG}-aarch64-signed.apk",
     'android_armv7'  => "clantodesk-{$LATEST_TAG}-armv7-signed.apk"
@@ -164,7 +164,7 @@ $release_date = get_release_date($REPO_URL, $LATEST_TAG);
                     </div>
                     <div class="group border-t border-gray-700 pt-3">
                         <p class="text-xs text-gray-500 mb-1 group-hover:text-blue-400 transition">Legacy / Sciter (x86)</p>
-                        <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['win_x86_sciter']}"; ?>" class="block w-full text-center py-2 bg-gray-700 hover:bg-blue-600 rounded-lg transition font-semibold">Download .exe</a>
+                        <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['win_x86_sciter']}"; ?>" class="block w-full text-center py-2 bg-gray-700 hover:bg-blue-600 rounded-lg transition font-semibold">windows 7</a>
                     </div>
                 </div>
             </div>
@@ -178,11 +178,35 @@ $release_date = get_release_date($REPO_URL, $LATEST_TAG);
                 <div class="space-y-4">
                     <div class="group">
                         <p class="text-xs text-gray-500 mb-1 group-hover:text-indigo-400 transition">Apple Silicon (M1/M2/M3)</p>
-                        <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['mac_arm']}"; ?>" class="block w-full text-center py-2 bg-gray-700 hover:bg-indigo-600 rounded-lg transition font-semibold">Download .dmg</a>
+                        <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['mac_arm']}"; ?>" class="block w-full text-center py-2 bg-gray-700 hover:bg-indigo-600 rounded-lg transition font-semibold">ARM .dmg</a>
                     </div>
                     <div class="group border-t border-gray-700 pt-3">
-                        <p class="text-xs text-gray-500 mb-1 group-hover:text-indigo-400 transition">Intel (64-bit)</p>
-                        <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['mac_x64']}"; ?>" class="block w-full text-center py-2 bg-gray-700 hover:bg-indigo-600 rounded-lg transition font-semibold">Download .dmg</a>
+                        <p class="text-xs text-gray-500 mb-1 group-hover:text-indigo-400 transition">Intel</p>
+                        <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['mac_x64']}"; ?>" class="block w-full text-center py-2 bg-gray-700 hover:bg-indigo-600 rounded-lg transition font-semibold">x64 .dmg</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Linux Universal -->
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                <h4 class="text-lg font-bold mb-4 text-green-400 flex items-center border-b border-gray-700 pb-2">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/></svg>
+                    Universal Linux
+                </h4>
+                <div class="space-y-3">
+                    <div class="group">
+                        <p class="text-[10px] text-gray-500 mb-1 uppercase">AppImage</p>
+                        <div class="flex gap-2 text-xs">
+                            <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_app_x64']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-green-600 rounded-lg transition font-semibold">x64</a>
+                            <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_app_arm']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-green-600 rounded-lg transition font-semibold">ARM64</a>
+                        </div>
+                    </div>
+                    <div class="group border-t border-gray-700 pt-2 text-xs">
+                        <p class="text-[10px] text-gray-500 mb-1 uppercase">Flatpak</p>
+                        <div class="flex gap-2">
+                            <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_flat_x64']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-green-600 rounded-lg transition font-semibold">x64</a>
+                            <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_flat_arm']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-green-600 rounded-lg transition font-semibold">ARM64</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -221,30 +245,6 @@ $release_date = get_release_date($REPO_URL, $LATEST_TAG);
                         <div class="flex gap-2">
                             <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_rpm_suse_x64']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-red-600 rounded-lg transition font-semibold">x64</a>
                             <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_rpm_suse_arm']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-red-600 rounded-lg transition font-semibold">ARM64</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Linux Universal -->
-            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
-                <h4 class="text-lg font-bold mb-4 text-green-400 flex items-center border-b border-gray-700 pb-2">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/></svg>
-                    Universal Linux
-                </h4>
-                <div class="space-y-3">
-                    <div class="group">
-                        <p class="text-[10px] text-gray-500 mb-1 uppercase">AppImage</p>
-                        <div class="flex gap-2 text-xs">
-                            <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_app_x64']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-green-600 rounded-lg transition font-semibold">x64</a>
-                            <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_app_arm']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-green-600 rounded-lg transition font-semibold">ARM64</a>
-                        </div>
-                    </div>
-                    <div class="group border-t border-gray-700 pt-2 text-xs">
-                        <p class="text-[10px] text-gray-500 mb-1 uppercase">Flatpak</p>
-                        <div class="flex gap-2">
-                            <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_flat_x64']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-green-600 rounded-lg transition font-semibold">x64</a>
-                            <a href="<?php echo "{$DOWNLOAD_BASE}/{$FILES['linux_flat_arm']}"; ?>" class="flex-1 text-center py-2 bg-gray-700 hover:bg-green-600 rounded-lg transition font-semibold">ARM64</a>
                         </div>
                     </div>
                 </div>

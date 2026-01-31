@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">ClantoDesk</string>
-    <string name="accessibility_service_description">Consenti ad altri dispositivi di controllare il tuo telefono.</string>
+    <string name="accessibility_service_description">Questo servizio è necessario per consentire il controllo remoto del dispositivo (clic, scorrimento, tastiera) da un'altra postazione autorizzata. Nessun dato sensibile viene raccolto o condiviso.</string>
 </resources>
