@@ -163,9 +163,6 @@ flutter:
     - family: Tabbar
       fonts:
         - asset: assets/tabbar.ttf
-    - family: MaterialIcons
-      fonts:
-        - asset: assets/MaterialIcons-Regular.otf
     - family: PeerSearchbar
       fonts:
         - asset: assets/peer_searchbar.ttf

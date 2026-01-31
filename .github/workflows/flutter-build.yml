@@ -650,7 +650,7 @@ jobs:
           # Set the provisioning profile UUID
           sed -i '' "s/DEVELOPMENT_TEAM = .*;/DEVELOPMENT_TEAM = DCP3L7L7BW;/g" ios/Runner.xcodeproj/project.pbxproj
           # NOTE: We REMOVE --no-codesign because we want it signed now
-          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+          flutter build ipa --release --no-tree-shake-icons --export-options-plist=ios/ExportOptions.plist
           popd
 
       - name: Rename IPA with version and architecture
@@ -1153,7 +1153,7 @@ jobs:
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/arm64-v8a/librustdesk.so
               # build flutter
               pushd flutter
-              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-arm64 --split-per-abi
+              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-arm64 --split-per-abi --no-tree-shake-icons
               mv build/app/outputs/flutter-apk/app-arm64-v8a-${{ matrix.job.reltype }}.apk ../clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk
             ;;
             armv7-linux-androideabi)
@@ -1162,7 +1162,7 @@ jobs:
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/armeabi-v7a/librustdesk.so
               # build flutter
               pushd flutter
-              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-arm --split-per-abi
+              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-arm --split-per-abi --no-tree-shake-icons
               mv build/app/outputs/flutter-apk/app-armeabi-v7a-${{ matrix.job.reltype }}.apk ../clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk
             ;;
             x86_64-linux-android)
@@ -1171,7 +1171,7 @@ jobs:
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/x86_64/librustdesk.so
               # build flutter
               pushd flutter
-              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-x64 --split-per-abi
+              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-x64 --split-per-abi --no-tree-shake-icons
               mv build/app/outputs/flutter-apk/app-x86_64-${{ matrix.job.reltype }}.apk ../clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk
             ;;
             i686-linux-android)
@@ -1180,7 +1180,7 @@ jobs:
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/x86/librustdesk.so
               # build flutter
               pushd flutter
-              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-x86 --split-per-abi
+              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-x86 --split-per-abi --no-tree-shake-icons
               mv build/app/outputs/flutter-apk/app-x86-${{ matrix.job.reltype }}.apk ../clantodesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk
             ;;
           esac
@@ -1382,8 +1382,8 @@ jobs:
           fi
           # build flutter (APK and AAB are automatically signed using key.properties)
           pushd flutter
-          flutter build apk "--${{ env.reltype }}" --target-platform android-arm64,android-arm,android-x64${{ env.x86_target }}
-          flutter build appbundle "--${{ env.reltype }}"
+          flutter build apk "--${{ env.reltype }}" --target-platform android-arm64,android-arm,android-x64${{ env.x86_target }} --no-tree-shake-icons
+          flutter build appbundle "--${{ env.reltype }}" --no-tree-shake-icons
           popd
           
           # Move signed artifacts to release directory
@@ -2178,7 +2178,7 @@ jobs:
           popd
 
           pushd flutter
-          flutter build web --release
+          flutter build web --release --no-tree-shake-icons
           cd build
           cp ../web/README.md web
           # TODO: Remove the following line when the web is almost complete.
